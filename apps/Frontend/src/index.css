@@ -45,6 +45,15 @@
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+  
+  /* Coffee Shop Theme Variables */
+  --coffee-dark: #2d1b0e;
+  --coffee-medium: #4a3429;
+  --coffee-light: #8b6f47;
+  --warm-yellow: #f4e4bc;
+  --muted-orange: #d4a574;
+  --text-primary: #c2c0b6;
+  --text-secondary: #9a9690;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
