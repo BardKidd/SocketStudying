@@ -22,6 +22,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
+  app.enableCors({
+    origin: 'http://localhost:5173', // 允許前端的來源
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // 允許的 HTTP 方法
+    credentials: true, // 允許發送 cookie 和 HTTP 認證資訊
+  });
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

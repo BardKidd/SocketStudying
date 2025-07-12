@@ -9,6 +9,7 @@ import { Post } from './post/entities/post.entity'; // 引入 Post Entity
 import { PostModule } from './post/post.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { JwtModule } from '@nestjs/jwt';
     }),
     PostModule,
     AuthModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
