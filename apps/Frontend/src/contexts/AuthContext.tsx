@@ -31,8 +31,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 計算認證狀態
-  const isAuthenticated = !!token && !!user;
+  // JWT token 過期檢查函數
+  const isTokenExpired = (token: string): boolean => {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      return payload.exp < currentTime;
+    } catch (error) {
+      // 如果無法解析 token，視為過期
+      return true;
+    }
+  };
+
+  // 計算認證狀態（包含 token 過期檢查）
+  const isAuthenticated = !!token && !!user && !isTokenExpired(token);
 
   // 初始化時從 localStorage 讀取認證資訊
   useEffect(() => {
@@ -42,8 +54,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const storedUser = localStorage.getItem('user');
 
         if (storedToken && storedUser) {
-          setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          // 檢查 token 是否過期
+          if (isTokenExpired(storedToken)) {
+            // Token 已過期，清除所有資料
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            console.log('Token 已過期，已自動登出');
+          } else {
+            // Token 仍有效，恢復認證狀態
+            setToken(storedToken);
+            setUser(JSON.parse(storedUser));
+          }
         }
       } catch (error) {
         console.error('初始化認證狀態時發生錯誤:', error);
@@ -58,6 +79,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
+  // 登出函數：清除所有認證資訊
+  const logout = () => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  };
+
+  // 定期檢查 token 過期
+  useEffect(() => {
+    if (!token) return;
+
+    const checkTokenExpiry = () => {
+      if (isTokenExpired(token)) {
+        console.log('Token 已過期，自動登出');
+        logout();
+      }
+    };
+
+    // 每分鐘檢查一次 token 是否過期
+    const intervalId = setInterval(checkTokenExpiry, 60000);
+
+    // 組件卸載時清除定時器
+    return () => clearInterval(intervalId);
+  }, [token]);
+
   // 登入函數：儲存 token 和用戶資訊
   const login = (newToken: string, newUser: User) => {
     try {
@@ -68,14 +115,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('儲存認證資訊時發生錯誤:', error);
     }
-  };
-
-  // 登出函數：清除所有認證資訊
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
   };
 
   const value: AuthContextType = {
