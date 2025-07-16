@@ -1,3 +1,4 @@
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import About from './pages/About';
 import Main from './pages/Main';
@@ -9,7 +10,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import ProtectedLayout from './layouts/ProtectedLayout';
 
-export default function AppRoutes() {
+const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* 認證頁面 - 直接路由，無 navbar */}
@@ -27,4 +28,6 @@ export default function AppRoutes() {
       </Route>
     </Routes>
   );
-}
+};
+
+export default AppRoutes;

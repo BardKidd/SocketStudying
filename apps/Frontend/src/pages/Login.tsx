@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -25,6 +26,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -66,18 +68,25 @@ const Login: React.FC = () => {
 
       const result = await response.json();
       
-      // 登入成功，顯示 toast 並跳轉到主頁面
-      toast.success('登入成功！歡迎回來', {
-        duration: 2000,
-      });
-      
-      // TODO: 儲存 JWT Token (下一步實作)
-      console.log('Login successful:', result);
-      
-      // 跳轉到主頁面
-      setTimeout(() => {
-        navigate('/');
-      }, 1000);
+      // 檢查 API 回應格式
+      if (result.data && result.data.access_token && result.data.user) {
+        // 儲存 JWT Token 和用戶資訊到 AuthContext
+        login(result.data.access_token, result.data.user);
+        
+        // 登入成功，顯示 toast 並跳轉到主頁面
+        toast.success('登入成功！歡迎回來', {
+          duration: 2000,
+        });
+        
+        // 跳轉到主頁面
+        setTimeout(() => {
+          navigate('/');
+        }, 1000);
+      } else {
+        // API 回應格式不正確
+        setErrorMessage('伺服器回應格式錯誤，請聯絡系統管理員');
+        console.error('Invalid API response format:', result);
+      }
 
     } catch (error) {
       console.error('登入錯誤:', error);

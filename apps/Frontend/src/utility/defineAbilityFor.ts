@@ -1,6 +1,11 @@
-import { defineAbility } from '@casl/ability';
+import { defineAbility, AbilityBuilder } from '@casl/ability';
 
-export default function defineAbilityFor(userPermissions = []) {
+interface UserPermission {
+  action: string;
+  subject: string;
+}
+
+export default function defineAbilityFor(userPermissions: UserPermission[] = []) {
   return defineAbility((can) => {
     userPermissions.forEach((permission) => {
       switch (permission.action) {
